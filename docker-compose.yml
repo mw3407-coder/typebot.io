@@ -6,7 +6,7 @@ x-typebot-common: &typebot-common
     typebot-db:
       condition: service_healthy
   networks:
-    - typebot-network
+    - dokploy-network
   env_file: .env
   environment:
     REDIS_URL: redis://typebot-redis:6379
@@ -26,7 +26,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - typebot-network
+      - dokploy-network
 
   typebot-redis:
     image: redis:alpine
@@ -41,7 +41,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - typebot-network
+      - dokploy-network
 
   typebot-builder:
     <<: *typebot-common
@@ -51,7 +51,13 @@ services:
       args:
         - SCOPE=builder
     ports:
-      - "8080:3000"
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.typebot-builder.rule=Host(`typebot-builder.orbit265.me`)"
+      - "traefik.http.routers.typebot-builder.entrypoints=websecure"
+      - "traefik.http.routers.typebot-builder.tls.certResolver=letsencrypt"
+      - "traefik.http.services.typebot-builder.loadbalancer.server.port=3000"
 
   typebot-viewer:
     <<: *typebot-common
@@ -61,11 +67,17 @@ services:
       args:
         - SCOPE=viewer
     ports:
-      - "8081:3000"
+      - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.typebot-viewer.rule=Host(`typebot-viewer.orbit265.me`)"
+      - "traefik.http.routers.typebot-viewer.entrypoints=websecure"
+      - "traefik.http.routers.typebot-viewer.tls.certResolver=letsencrypt"
+      - "traefik.http.services.typebot-viewer.loadbalancer.server.port=3000"
 
 networks:
-  typebot-network:
-    driver: bridge
+  dokploy-network:
+    external: true
 
 volumes:
   db-data:
