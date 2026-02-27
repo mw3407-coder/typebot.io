@@ -45,11 +45,7 @@ services:
 
   typebot-builder:
     <<: *typebot-common
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - SCOPE=builder
+    image: baptistearno/typebot-builder:latest
     ports:
       - "3000"
     labels:
@@ -61,11 +57,7 @@ services:
 
   typebot-viewer:
     <<: *typebot-common
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - SCOPE=viewer
+    image: baptistearno/typebot-viewer:latest
     ports:
       - "3000"
     labels:
